@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>BTEB Result Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.2/sweetalert2.all.min.js"></script>
+<style>
+:root{
+  --bg:#060e1e;--s1:#0b1629;--s2:#101e36;--s3:#162540;
+  --border:rgba(100,180,255,0.1);--border2:rgba(100,180,255,0.2);
+  --gold:#f6c90e;--gold2:#ffd93d;--gold-glow:rgba(246,201,14,0.12);
+  --blue:#63b3ed;--blue2:#90cdf4;--blue-glow:rgba(99,179,237,0.1);
+  --green:#48bb78;--green2:#68d391;
+  --red:#fc8181;--red2:#feb2b2;
+  --orange:#f6ad55;--orange2:#fbd38d;
+  --purple:#b794f4;
+  --text:#e2e8f0;--text2:#a0aec0;--text3:#718096;
+  --r:16px;--r2:10px;--r3:8px;
+  --tab-h:56px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Hind Siliguri',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
+
+/* BG */
+.bg-wrap{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.bg-grad{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 10% 10%,rgba(99,179,237,0.05),transparent),radial-gradient(ellipse 60% 50% at 90% 90%,rgba(246,201,14,0.03),transparent),var(--bg);}
+.bg-grid{position:absolute;inset:0;opacity:0.025;background-image:linear-gradient(rgba(99,179,237,1) 1px,transparent 1px),linear-gradient(90deg,rgba(99,179,237,1) 1px,transparent 1px);background-size:50px 50px;}
+.orb{position:absolute;border-radius:50%;filter:blur(70px);animation:oFloat 10s ease-in-out infinite;}
+.orb1{width:400px;height:400px;background:rgba(99,179,237,0.04);top:-100px;right:-100px;}
+.orb2{width:350px;height:350px;background:rgba(246,201,14,0.03);bottom:-80px;left:-80px;animation-delay:5s;}
+@keyframes oFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-20px);}}
+
+/* SCROLL AREA */
+.app{position:relative;z-index:1;display:flex;flex-direction:column;height:100%;}
+.scroll-area{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:10px;}
+::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:var(--s1);} ::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px;}
+
+/* TOP BAR */
+.topbar{
+  background:rgba(11,22,41,0.95);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:12px 16px;display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;position:sticky;top:0;z-index:100;
+}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{font-size:22px;}
+.logo-text{font-family:'Noto Serif Bengali',serif;font-size:16px;font-weight:700;
+  background:linear-gradient(135deg,#fff,var(--blue2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:10px;color:var(--text3);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.login-btn-top{padding:7px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--blue-glow);color:var(--blue2);font-family:'Hind Siliguri',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
+.login-btn-top:hover{background:rgba(99,179,237,0.2);}
+.avatar-top{width:34px;height:34px;border-radius:50%;border:2px solid var(--gold);object-fit:cover;cursor:pointer;}
+.avatar-placeholder{width:34px;height:34px;border-radius:50%;background:var(--gold-glow);border:2px solid var(--gold);display:grid;place-items:center;font-size:16px;cursor:pointer;}
+
+/* BOTTOM NAV */
+.bottom-nav{
+  background:rgba(11,22,41,0.97);backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex;height:var(--tab-h);flex-shrink:0;
+  position:sticky;bottom:0;z-index:100;
+}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:var(--text3);cursor:pointer;transition:all .2s;position:relative;font-family:'Hind Siliguri',sans-serif;}
+.bnav-btn.active{color:var(--gold);}
+.bnav-btn.active::before{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--gold);border-radius:0 0 4px 4px;}
+.bnav-icon{font-size:20px;line-height:1;}
+.bnav-label{font-size:10px;font-weight:600;letter-spacing:0.3px;}
+
+/* PAGES */
+.page{display:none;padding:16px;animation:pIn .3s ease;}
+.page.active{display:block;}
+@keyframes pIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:14px;position:relative;overflow:hidden;}
+.card-top-line::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--blue),transparent);}
+.card-title{font-size:15px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.card-sub{font-size:13px;color:var(--text3);margin-bottom:18px;}
+
+/* INPUT */
+.inp{width:100%;background:var(--s2);border:1.5px solid var(--border);border-radius:var(--r2);padding:13px 16px;color:var(--text);font-family:'Hind Siliguri',sans-serif;font-size:15px;outline:none;transition:all .2s;}
+.inp:focus{border-color:rgba(99,179,237,.5);background:var(--s3);box-shadow:0 0 0 3px var(--blue-glow);}
+.inp::placeholder{color:var(--text3);}
+select.inp{appearance:none;cursor:pointer;}
+
+/* BUTTONS */
+.btn{width:100%;padding:13px;border:none;border-radius:var(--r2);font-family:'Hind Siliguri',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-blue{background:linear-gradient(135deg,#1a56db,#2563eb);color:#fff;box-shadow:0 4px 20px rgba(37,99,235,.3);}
+.btn-blue:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(37,99,235,.4);}
+.btn-gold{background:linear-gradient(135deg,#92400e,#b45309);color:#fff;box-shadow:0 4px 20px rgba(180,83,9,.3);}
+.btn-gold:hover{transform:translateY(-1px);}
+.btn-outline{background:transparent;border:1.5px solid var(--border2);color:var(--text2);}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue);}
+.btn-sm{padding:9px 16px;font-size:13px;width:auto;}
+
+/* PILLS */
+.pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700;}
+.pill-pass{background:rgba(72,187,120,.15);color:var(--green2);border:1px solid rgba(72,187,120,.25);}
+.pill-fail{background:rgba(252,129,129,.15);color:var(--red);border:1px solid rgba(252,129,129,.25);}
+.pill-ref{background:rgba(246,173,85,.15);color:var(--orange);border:1px solid rgba(246,173,85,.25);}
+.pill-gpa{background:rgba(99,179,237,.12);color:var(--blue2);border:1px solid rgba(99,179,237,.2);}
+.pill-gold{background:var(--gold-glow);color:var(--gold);border:1px solid rgba(246,201,14,.2);}
+
+/* SECTION TITLE */
+.sec-title{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.sec-title::before{content:'';width:3px;height:14px;background:var(--gold);border-radius:2px;flex-shrink:0;}
+
+/* SKELETON */
+.skel{background:linear-gradient(90deg,var(--s2) 25%,var(--s3) 50%,var(--s2) 75%);background-size:200%;animation:shimmer 1.4s infinite;border-radius:6px;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+/* ═══ SEARCH PAGE ═══ */
+.search-hero{text-align:center;padding:24px 0 20px;}
+.hero-cap{font-size:48px;display:block;animation:capIn .7s cubic-bezier(.34,1.56,.64,1);}
+@keyframes capIn{from{transform:translateY(-20px) scale(.6) rotate(-15deg);opacity:0;}to{transform:none;opacity:1;}}
+.hero-title{font-family:'Noto Serif Bengali',serif;font-size:26px;font-weight:700;margin:10px 0 4px;background:linear-gradient(135deg,#fff,var(--blue2) 60%,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:13px;color:var(--text3);}
+
+.search-box{display:flex;gap:10px;margin-bottom:14px;}
+.search-box .inp{font-size:16px;}
+
+/* RESULT TAB */
+.result-tab-wrap{margin-top:20px;}
+.result-tab-bar{display:flex;background:var(--s2);border-radius:var(--r);padding:4px;gap:4px;margin-bottom:16px;overflow-x:auto;}
+.rtab{flex:1;min-width:80px;padding:9px 8px;background:none;border:none;color:var(--text3);font-family:'Hind Siliguri',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;transition:all .2s;white-space:nowrap;}
+.rtab.active{background:var(--s3);color:var(--gold);border:1px solid rgba(246,201,14,.2);}
+
+/* RESULT CARD - BTEB STYLE */
+.result-header{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:12px;}
+.r-roll{font-size:26px;font-weight:800;color:#fff;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.r-roll span{font-size:14px;font-weight:500;color:var(--text3);}
+.r-meta-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.r-meta-chip{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text3);background:var(--s3);padding:5px 10px;border-radius:20px;}
+.r-meta-chip strong{color:var(--text2);}
+
+.sem-result-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden;transition:border-color .2s;}
+.sem-result-card:hover{border-color:var(--border2);}
+.src-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--s2);cursor:pointer;}
+.src-head-left{display:flex;align-items:center;gap:10px;}
+.src-num{width:32px;height:32px;border-radius:8px;background:var(--gold-glow);border:1px solid rgba(246,201,14,.25);display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--gold);}
+.src-sem-name{font-weight:700;font-size:15px;}
+.src-date{font-size:11px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:4px;}
+.src-right{display:flex;align-items:center;gap:8px;}
+.gpa-display{background:rgba(72,187,120,.1);border:1px solid rgba(72,187,120,.2);border-radius:8px;padding:8px 14px;text-align:center;}
+.gpa-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;}
+.gpa-num{font-size:20px;font-weight:800;color:var(--green2);}
+.chevron{color:var(--text3);font-size:11px;transition:transform .3s;margin-left:4px;}
+.sem-result-card.open .chevron{transform:rotate(180deg);}
+.src-body{display:none;border-top:1px solid var(--border);}
+.sem-result-card.open .src-body{display:block;}
+
+/* SUBJECTS TABLE */
+.sub-table{width:100%;border-collapse:collapse;font-size:13px;}
+.sub-table th{background:rgba(99,179,237,.05);padding:9px 14px;color:var(--text3);text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);}
+.sub-table td{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s;}
+.sub-table tr:last-child td{border-bottom:none;}
+.sub-table tr:hover td{background:rgba(99,179,237,.03);}
+.m-pass{color:var(--green2);font-weight:700;}
+.m-fail{color:var(--red);font-weight:700;}
+.m-ref{color:var(--orange);font-weight:700;}
+.grade-b{display:inline-block;padding:2px 6px;border-radius:5px;font-size:11px;font-weight:800;}
+.gA{background:rgba(72,187,120,.2);color:#68d391;}.gB{background:rgba(99,179,237,.2);color:var(--blue2);}.gC{background:rgba(246,201,14,.2);color:var(--gold2);}.gD{background:rgba(246,173,85,.2);color:var(--orange);}.gF{background:rgba(252,129,129,.2);color:var(--red);}
+
+/* GPA BAR IN SEM */
+.gpa-bar-row{padding:14px 18px;border-top:1px solid var(--border);background:rgba(99,179,237,.02);}
+.gpa-bar-inner{display:flex;align-items:center;gap:10px;}
+.gpa-bar-bg{flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden;}
+.gpa-bar-fg{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.34,1.2,.64,1);}
+.gpa-bar-val{font-size:12px;font-weight:700;min-width:32px;text-align:right;}
+
+/* CGPA SUMMARY */
+.cgpa-summary{background:linear-gradient(135deg,rgba(72,187,120,.08),rgba(99,179,237,.06));border:1px solid rgba(72,187,120,.2);border-radius:var(--r);padding:20px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+.cgpa-left .label{font-size:12px;color:var(--text3);margin-bottom:4px;}
+.cgpa-left .val{font-size:38px;font-weight:800;background:linear-gradient(135deg,var(--green),var(--blue2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.cgpa-right{text-align:right;}
+.cgpa-right .status{font-size:14px;font-weight:700;}
+
+/* CHART CARD */
+.chart-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+
+/* ACTION ROW */
+.action-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.action-btn{flex:1;min-width:100px;padding:10px 12px;border-radius:var(--r3);border:1.5px solid var(--border);background:var(--s2);color:var(--text2);font-family:'Hind Siliguri',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.action-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-glow);}
+
+/* ═══ USER / PROFILE PAGE ═══ */
+.profile-hero{display:flex;flex-direction:column;align-items:center;padding:24px 0 16px;text-align:center;}
+.profile-avatar-wrap{position:relative;width:90px;height:90px;margin-bottom:14px;}
+.profile-avatar{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);}
+.profile-avatar-placeholder{width:90px;height:90px;border-radius:50%;background:var(--gold-glow);border:3px solid var(--gold);display:grid;place-items:center;font-size:36px;}
+.profile-name{font-family:'Noto Serif Bengali',serif;font-size:22px;font-weight:700;margin-bottom:4px;}
+.profile-roll{font-size:13px;color:var(--text3);}
+.profile-badges{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;}
+
+.profile-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.pstat{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:14px;text-align:center;}
+.pstat .num{font-size:24px;font-weight:800;color:var(--gold);}
+.pstat .lbl{font-size:11px;color:var(--text3);margin-top:2px;}
+
+/* LOGIN FORM */
+.login-wrap{max-width:420px;margin:0 auto;}
+.or-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--text3);font-size:12px;}
+.or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.photo-upload{display:flex;align-items:center;gap:12px;background:var(--s2);border:1.5px dashed var(--border2);border-radius:var(--r2);padding:12px 14px;cursor:pointer;transition:all .2s;}
+.photo-upload:hover{border-color:var(--blue);}
+.photo-thumb{width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--s3);display:grid;place-items:center;font-size:20px;overflow:hidden;flex-shrink:0;}
+#photo-input{display:none;}
+
+/* ═══ INSTITUTE PAGE ═══ */
+.inst-search-row{display:flex;gap:10px;margin-bottom:16px;}
+.inst-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:12px;}
+.inst-name{font-weight:700;font-size:16px;margin-bottom:4px;}
+.inst-meta{font-size:12px;color:var(--text3);margin-bottom:14px;}
+.inst-sem-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.inst-sem-box{background:var(--s2);border-radius:var(--r3);padding:10px;text-align:center;cursor:pointer;border:1px solid var(--border);transition:all .2s;}
+.inst-sem-box:hover,.inst-sem-box.active{border-color:var(--gold);background:var(--gold-glow);}
+.inst-sem-box .s-name{font-size:11px;color:var(--text3);}
+.inst-sem-box .s-num{font-size:18px;font-weight:800;color:var(--text);}
+.inst-detail{display:none;}
+.inst-detail.show{display:block;}
+
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.stat-box{background:var(--s2);border-radius:var(--r3);padding:12px;text-align:center;}
+.stat-box .sn{font-size:22px;font-weight:800;}
+.stat-box .sl{font-size:11px;color:var(--text3);margin-top:2px;}
+.stat-green{color:var(--green2);}
+.stat-red{color:var(--red);}
+.stat-orange{color:var(--orange);}
+
+/* ═══ GPA CALCULATOR ═══ */
+.calc-subject-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.calc-row{display:flex;gap:8px;align-items:center;}
+.calc-row .inp{flex:1;}
+.calc-row .inp-sm{width:90px;flex-shrink:0;}
+.del-btn{width:36px;height:36px;border-radius:var(--r3);background:rgba(252,129,129,.1);border:1px solid rgba(252,129,129,.2);color:var(--red);cursor:pointer;font-size:16px;flex-shrink:0;display:grid;place-items:center;transition:all .2s;}
+.del-btn:hover{background:rgba(252,129,129,.25);}
+.gpa-result-box{background:linear-gradient(135deg,rgba(72,187,120,.08),rgba(99,179,237,.06));border:1px solid rgba(72,187,120,.2);border-radius:var(--r);padding:20px;text-align:center;margin-top:14px;display:none;}
+.gpa-result-box.show{display:block;}
+.gpa-result-big{font-size:52px;font-weight:800;background:linear-gradient(135deg,var(--green),var(--blue2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;}
+.gpa-result-label{font-size:13px;color:var(--text3);margin-top:6px;}
+.gpa-result-grade{font-size:18px;font-weight:700;margin-top:8px;}
+
+/* ═══ ADMIN ═══ */
+
+.lock-big{font-size:52px;margin-bottom:16px;display:block;}
+#pass-input{text-align:center;letter-spacing:6px;font-size:18px;}
+
+/* LOADING OVERLAY */
+.loading-overlay{position:fixed;inset:0;background:rgba(6,14,30,.85);backdrop-filter:blur(8px);z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.loading-overlay.show{display:flex;}
+.spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-text{font-size:15px;color:var(--text2);}
+
+/* CONFETTI */
+.conf{position:fixed;width:8px;height:8px;border-radius:2px;pointer-events:none;z-index:9998;animation:confFall linear forwards;}
+@keyframes confFall{0%{transform:translateY(-10px) rotate(0);opacity:1;}100%{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3);}
+.empty-icon{font-size:44px;margin-bottom:12px;display:block;}
+.empty-title{font-size:16px;font-weight:600;color:var(--text2);margin-bottom:6px;}
+.empty-sub{font-size:13px;}
+
+/* NOTICE */
+.notice{background:rgba(246,201,14,.05);border:1px solid rgba(246,201,14,.2);border-radius:10px;padding:12px 14px;font-size:13px;color:#c9980a;line-height:1.7;margin-bottom:14px;}
+
+/* PHOTO CHANGE */
+.photo-change-btn{position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;background:var(--gold);border:none;cursor:pointer;font-size:13px;display:grid;place-items:center;}
+
+/* ═══ DESKTOP ═══ */
+@media(min-width:640px){
+  .app{max-width:480px;margin:0 auto;border-left:1px solid var(--border);border-right:1px solid var(--border);}
+  .scroll-area{padding-bottom:20px;}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-wrap">
+  <div class="bg-grad"></div>
+  <div class="bg-grid"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">অনুসন্ধান করা হচ্ছে...</div>
+</div>
+
+<div class="app">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="logo">
+      <span class="logo-icon" onclick="secretAdminClick()" style="cursor:default;user-select:none;">🎓</span>
+      <div>
+        <div class="logo-text">BTEB Result Portal</div>
+        <div class="logo-sub">Bangladesh Technical Education Board</div>
+      </div>
+    </div>
+    <div class="topbar-right" id="topbar-right">
+      <button class="login-btn-top" onclick="gotoPage('profile')">👤 Login</button>
+    </div>
+  </div>
+
+  <!-- SCROLL AREA -->
+  <div class="scroll-area" id="scroll-area">
+
+    <!-- ═══ HOME / SEARCH ═══ -->
+    <div class="page active" id="page-home">
+      <div class="search-hero">
+        <span class="hero-cap">🎓</span>
+        <div class="hero-title">ডিপ্লোমা রেজাল্ট</div>
+        <div class="hero-sub">রোল নম্বর দিয়ে যেকোনো ছাত্রের রেজাল্ট দেখুন</div>
+      </div>
+
+      <div class="card card-top-line">
+        <div class="search-box">
+          <input class="inp" id="roll-inp" type="number" placeholder="রোল নম্বর লিখুন..." onkeydown="if(event.key==='Enter')doSearch()">
+          <button class="btn btn-blue btn-sm" onclick="doSearch()" style="width:auto;padding:13px 20px">🔍</button>
+        </div>
+
+      </div>
+
+      <!-- Result tabs -->
+      <div id="result-area" style="display:none;"></div>
+    </div>
+
+    <!-- ═══ PROFILE / USER ═══ -->
+    <div class="page" id="page-profile">
+      <div id="login-view">
+        <div class="login-wrap">
+          <div class="card card-top-line">
+            <!-- Tab switcher -->
+            <div style="display:flex;background:var(--s3);border-radius:10px;padding:4px;gap:4px;margin-bottom:18px;">
+              <button id="tab-login-btn" onclick="switchAuthTab('login')"
+                style="flex:1;padding:10px;border:none;border-radius:8px;font-family:'Hind Siliguri',sans-serif;font-size:14px;font-weight:600;cursor:pointer;background:linear-gradient(135deg,var(--s2),var(--s1));color:var(--gold);border:1px solid rgba(246,201,14,.2);transition:all .2s;">
+                🔑 Login
+              </button>
+              <button id="tab-reg-btn" onclick="switchAuthTab('register')"
+                style="flex:1;padding:10px;border:none;border-radius:8px;font-family:'Hind Siliguri',sans-serif;font-size:14px;font-weight:600;cursor:pointer;background:none;color:var(--text3);transition:all .2s;">
+                📝 Register
+              </button>
+            </div>
+
+            <!-- LOGIN TAB -->
+            <div id="auth-login-tab">
+              <div class="card-title">🔑 Login</div>
+              <div class="card-sub">আগে থেকে register করা থাকলে শুধু রোল নম্বর দিন</div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">
+                <input class="inp" id="login-roll" type="number" placeholder="রোল নম্বর *" onkeydown="if(event.key==='Enter')doLogin()">
+                <button class="btn btn-gold" onclick="doLogin()">🔓 Login করুন</button>
+              </div>
+              <div style="margin-top:14px;font-size:13px;color:var(--text3);text-align:center;">
+                নতুন? <span onclick="switchAuthTab('register')" style="color:var(--gold);cursor:pointer;font-weight:600;">Register করুন →</span>
+              </div>
+            </div>
+
+            <!-- REGISTER TAB -->
+            <div id="auth-reg-tab" style="display:none;">
+              <div class="card-title">📝 Register</div>
+              <div class="card-sub">প্রথমবার? নিচের তথ্য দিয়ে profile তৈরি করুন</div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">
+                <input class="inp" id="reg-name" placeholder="আপনার নাম *">
+                <input class="inp" id="reg-roll" type="number" placeholder="রোল নম্বর *">
+                <select class="inp" id="reg-tech">
+                  <option value="">টেকনোলজি বেছে নিন</option>
+                  <option>CST</option><option>Civil</option><option>Electrical</option>
+                  <option>Mechanical</option><option>Electronics</option><option>RAC</option>
+                  <option>Architecture</option><option>Textile</option><option>Chemical</option>
+                  <option>Food</option><option>Printing</option><option>Surveying</option>
+                  <option>Other</option>
+                </select>
+                <select class="inp" id="reg-season">
+                  <option value="">Session/Season বেছে নিন</option>
+                  <option>2022-23</option>
+                  <option>2023-24</option>
+                  <option>2024-25</option>
+                  <option>2025-26</option>
+                </select>
+                <input class="inp" id="reg-inst" placeholder="প্রতিষ্ঠানের নাম">
+                <div class="photo-upload" onclick="document.getElementById('photo-input').click()">
+                  <div class="photo-thumb" id="photo-thumb">📷</div>
+                  <div>
+                    <div style="font-weight:600;font-size:14px;">প্রোফাইল ছবি যোগ করুন</div>
+                    <div style="font-size:12px;color:var(--text3);">ঐচ্ছিক — JPG/PNG</div>
+                  </div>
+                </div>
+                <input type="file" id="photo-input" accept="image/*" onchange="handlePhoto(event)">
+                <button class="btn btn-gold" onclick="doRegister()">✅ Profile তৈরি করুন</button>
+              </div>
+              <div style="margin-top:14px;font-size:13px;color:var(--text3);text-align:center;">
+                আগে register করেছেন? <span onclick="switchAuthTab('login')" style="color:var(--gold);cursor:pointer;font-weight:600;">Login করুন →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="profile-view" style="display:none;">
+        <div class="profile-hero">
+          <div class="profile-avatar-wrap">
+            <div id="pav-wrap">
+              <div class="profile-avatar-placeholder" id="pav">😊</div>
+            </div>
+            <button class="photo-change-btn" onclick="document.getElementById('photo-change-input').click()">✏️</button>
+            <input type="file" id="photo-change-input" accept="image/*" style="display:none" onchange="handlePhotoChange(event)">
+          </div>
+          <div class="profile-name" id="p-name">—</div>
+          <div class="profile-roll" id="p-roll">রোল: —</div>
+          <div class="profile-badges">
+            <span class="pill pill-gold" id="p-tech">—</span>
+            <span class="pill pill-gpa" id="p-season">—</span>
+          </div>
+          <div style="font-size:12px;color:var(--text3);margin-top:6px;" id="p-inst"></div>
+        </div>
+
+        <div class="profile-stats">
+          <div class="pstat"><div class="num" id="ps-total">0</div><div class="lbl">সেমিস্টার</div></div>
+          <div class="pstat"><div class="num" id="ps-cgpa" style="color:var(--green2)">—</div><div class="lbl">CGPA</div></div>
+          <div class="pstat"><div class="num" id="ps-pass" style="color:var(--green2)">0</div><div class="lbl">পাস</div></div>
+          <div class="pstat"><div class="num" id="ps-fail" style="color:var(--red)">0</div><div class="lbl">ফেল/রেফার্ড</div></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="sec-title">GPA ট্রেন্ড</div>
+          <canvas id="profile-chart" height="130"></canvas>
+        </div>
+
+        <div id="profile-result-area"></div>
+
+        <div style="margin-top:8px;">
+          <button class="btn btn-outline" onclick="doLogout()">🚪 Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ INSTITUTE ═══ -->
+    <div class="page" id="page-institute">
+      <div class="card card-top-line">
+        <div class="card-title">🏫 Institute Results</div>
+        <div class="card-sub">প্রতিষ্ঠানভিত্তিক সেমিস্টার পরিসংখ্যান</div>
+        <div class="inst-search-row">
+          <input class="inp" id="inst-search-inp" placeholder="প্রতিষ্ঠানের নাম লিখুন..." oninput="renderInstList()">
+        </div>
+      </div>
+      <div id="inst-list"></div>
+    </div>
+
+    <!-- ═══ GPA CALCULATOR ═══ -->
+    <div class="page" id="page-calc">
+      <div class="card card-top-line">
+        <div class="card-title">🧮 GPA Calculator</div>
+        <div class="card-sub">বিষয়ের মার্কস দিয়ে GPA হিসাব করুন</div>
+
+        <div class="sec-title">বিষয়ের তালিকা</div>
+        <div class="calc-subject-list" id="calc-list"></div>
+        <button class="btn btn-outline" onclick="addCalcRow()" style="margin-bottom:14px;">➕ বিষয় যোগ করুন</button>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          <button class="btn btn-blue" onclick="calcGPA()">📊 GPA হিসাব</button>
+          <button class="btn btn-outline" onclick="resetCalc()">🔄 Reset</button>
+        </div>
+
+        <div class="gpa-result-box" id="gpa-result-box">
+          <div class="gpa-result-big" id="gpa-result-num">0.00</div>
+          <div class="gpa-result-label">আপনার GPA (৪.০০ স্কেলে)</div>
+          <div class="gpa-result-grade" id="gpa-result-grade"></div>
+        </div>
+
+        <!-- CGPA Calc -->
+        <div style="margin-top:20px;">
+          <div class="sec-title">CGPA ক্যালকুলেটর</div>
+          <div class="notice">প্রতিটি সেমিস্টারের GPA দিন। সমস্ত সেমিস্টারের গড় CGPA বের হবে।</div>
+          <div id="cgpa-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;"></div>
+          <button class="btn btn-outline" onclick="addCGPARow()" style="margin-bottom:12px;">➕ সেমিস্টার যোগ করুন</button>
+          <button class="btn btn-blue" onclick="calcCGPA()">📊 CGPA হিসাব</button>
+          <div class="gpa-result-box" id="cgpa-result-box" style="margin-top:14px;">
+            <div class="gpa-result-big" id="cgpa-result-num">0.00</div>
+            <div class="gpa-result-label">আপনার CGPA</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- ═══ ADMIN (HIDDEN) ═══ -->
+    <div class="page" id="page-admin">
+      <!-- Gate -->
+      <div id="admin-gate-view" style="text-align:center;padding:40px 20px;">
+        <div style="font-size:52px;margin-bottom:16px;">🔒</div>
+        <div style="font-family:'Noto Serif Bengali',serif;font-size:20px;font-weight:700;margin-bottom:6px;">Admin Panel</div>
+        <div style="font-size:13px;color:var(--text3);margin-bottom:24px;">শুধুমাত্র প্রশাসকের জন্য</div>
+        <input class="inp" id="pass-input" type="password" placeholder="••••••••"
+          style="max-width:280px;margin:0 auto 14px;display:block;text-align:center;letter-spacing:6px;"
+          onkeydown="if(event.key==='Enter')checkPass()">
+        <button class="btn btn-gold" style="max-width:200px;margin:0 auto;" onclick="checkPass()">🔓 প্রবেশ করুন</button>
+      </div>
+
+      <!-- Panel -->
+      <div id="admin-panel-view" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font-weight:700;font-size:16px;">⚙️ Admin Dashboard</div>
+          <button class="btn btn-outline btn-sm" onclick="doAdminLogout()">🚪 Logout</button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stat-row" style="grid-template-columns:repeat(2,1fr);margin-bottom:14px;">
+          <div class="stat-box"><div class="sn stat-green" id="adm-students">0</div><div class="sl">মোট ছাত্র</div></div>
+          <div class="stat-box"><div class="sn" style="color:var(--blue2)" id="adm-semesters">0</div><div class="sl">সেমিস্টার রেকর্ড</div></div>
+        </div>
+
+        <!-- PDF Upload -->
+        <div class="card card-top-line">
+          <div class="card-title">📄 BTEB PDF Import</div>
+          <div class="card-sub">BTEB official result PDF আপলোড করুন — স্বয়ংক্রিয়ভাবে parse হবে</div>
+          <div class="notice" style="margin-top:10px;">
+            ⚠️ এই PDF এ Roll, Institute, GPA (প্রতি সেমিস্টার), Referred subject code থাকতে হবে। একসাথে একাধিক PDF দেওয়া যাবে।
+          </div>
+          <div id="adm-upload-zone"
+            style="border:2px dashed rgba(99,179,237,.25);border-radius:12px;padding:28px;text-align:center;cursor:pointer;background:rgba(99,179,237,.02);margin-top:12px;transition:all .2s;"
+            onclick="document.getElementById('adm-pdf-input').click()"
+            ondragover="event.preventDefault();this.style.borderColor='var(--gold)'"
+            ondragleave="this.style.borderColor='rgba(99,179,237,.25)'"
+            ondrop="handleAdmDrop(event)">
+            <div style="font-size:36px;margin-bottom:10px;">📂</div>
+            <div style="font-weight:600;margin-bottom:4px;">PDF ড্রপ করুন বা ক্লিক করুন</div>
+            <div style="font-size:12px;color:var(--text3);">Multiple PDF সাপোর্ট করে</div>
+          </div>
+          <input type="file" id="adm-pdf-input" accept=".pdf" multiple style="display:none" onchange="handleAdmFiles(event)">
+          <button class="btn btn-gold" id="adm-parse-btn" style="margin-top:12px;display:none;" onclick="runAdmParse()">⚡ Parse ও Import করুন</button>
+          <div id="adm-progress" style="margin-top:12px;display:none;">
+            <div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;margin-bottom:6px;">
+              <div id="adm-prog-fill" style="height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));border-radius:3px;width:0%;transition:width .3s;"></div>
+            </div>
+            <div id="adm-prog-text" style="font-size:12px;color:var(--text3);"></div>
+          </div>
+          <div id="adm-log" style="background:#020810;border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:10px;max-height:160px;overflow-y:auto;display:none;font-size:11px;font-family:monospace;line-height:1.8;"></div>
+        </div>
+
+        <!-- DB Browse -->
+        <div class="card" style="margin-top:12px;">
+          <div class="card-title">🗄️ Database</div>
+          <input class="inp" id="adm-search" placeholder="নাম বা রোল খুঁজুন..." oninput="renderAdmList()" style="margin-bottom:12px;">
+          <div id="adm-db-list" style="max-height:260px;overflow-y:auto;"></div>
+        </div>
+
+        <!-- Backup -->
+        <div class="card" style="margin-top:12px;">
+          <div class="card-title">💾 Backup</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" onclick="exportDB()">⬇️ Export JSON</button>
+            <button class="btn btn-outline btn-sm" onclick="importDB()">⬆️ Import JSON</button>
+            <button class="btn btn-sm" style="background:rgba(252,129,129,.1);border:1px solid rgba(252,129,129,.2);color:var(--red);" onclick="clearDB()">🗑️ সব মুছুন</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /scroll -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="bnav-btn active" onclick="switchPage('home',this)">
+      <span class="bnav-icon">🔍</span><span class="bnav-label">রেজাল্ট</span>
+    </button>
+    <button class="bnav-btn" onclick="switchPage('profile',this)">
+      <span class="bnav-icon">👤</span><span class="bnav-label">Profile</span>
+    </button>
+    <button class="bnav-btn" onclick="switchPage('institute',this)">
+      <span class="bnav-icon">🏫</span><span class="bnav-label">Institute</span>
+    </button>
+    <button class="bnav-btn" onclick="switchPage('calc',this)">
+      <span class="bnav-icon">🧮</span><span class="bnav-label">Calculator</span>
+    </button>
+  </div>
+</div><!-- /app -->
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+/* ══════════════════════════════════
+   DATABASE — IndexedDB for performance
+══════════════════════════════════ */
+let DB={};
+let USERS={};
+let currentUser=null;
+let ADMIN_PASS=localStorage.getItem('bteb_admin_pass')||'bteb@admin2025';
+let adminLoggedIn=false;
+let selectedAdmFiles=[];
+let profileChartInst=null;
+let gpaChartSearch=null;
+
+// ── Secret admin access (🎓 logo 5 clicks) ──
+let _secretClicks=0,_secretTimer=null;
+function secretAdminClick(){
+  _secretClicks++;
+  clearTimeout(_secretTimer);
+  _secretTimer=setTimeout(()=>{_secretClicks=0;},2000);
+  if(_secretClicks>=5){
+    _secretClicks=0;
+    const nav=document.querySelector('.bottom-nav');
+    let btn=document.getElementById('admin-nav-btn');
+    if(!btn){
+      btn=document.createElement('button');
+      btn.className='bnav-btn';btn.id='admin-nav-btn';
+      btn.innerHTML='<span class="bnav-icon">⚙️</span><span class="bnav-label">Admin</span>';
+      btn.onclick=function(){switchPage('admin',this);};
+      nav.appendChild(btn);
+    }
+    btn.click();
+  }
+}
+
+// Load from localStorage
+function loadDB(){
+  try{DB=JSON.parse(localStorage.getItem('bteb_db')||'{}');}catch(e){DB={};}
+  try{USERS=JSON.parse(localStorage.getItem('bteb_users')||'{}');}catch(e){USERS={};}
+  const cu=localStorage.getItem('bteb_current_user');
+  if(cu){currentUser=JSON.parse(cu);updateTopbar();renderProfileView();}
+}
+function saveDB(){localStorage.setItem('bteb_db',JSON.stringify(DB));}
+function saveUsers(){localStorage.setItem('bteb_users',JSON.stringify(USERS));}
+
+/* ══════════════════════════════════
+   NAVIGATION
+══════════════════════════════════ */
+function switchPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+  document.getElementById('scroll-area').scrollTop=0;
+  if(name==='institute')renderInstList();
+  if(name==='admin'&&adminLoggedIn)updateAdmStats();
+}
+function gotoPage(name){
+  const btns=document.querySelectorAll('.bnav-btn');
+  const pages=['home','profile','institute','calc','admin'];
+  const idx=pages.indexOf(name);
+  switchPage(name,idx>=0?btns[idx]:null);
+}
+
+/* ══════════════════════════════════
+   SEARCH RESULT
+══════════════════════════════════ */
+function doSearch(rollOverride){
+  const roll=(rollOverride||document.getElementById('roll-inp').value).toString().trim();
+  if(!roll){toast('রোল নম্বর দিন','warning');return;}
+  showLoading('অনুসন্ধান করা হচ্ছে...');
+  setTimeout(()=>{
+    hideLoading();
+    const s=DB[roll];
+    if(!s){
+      document.getElementById('result-area').style.display='block';
+      document.getElementById('result-area').innerHTML=`<div class="empty-state"><span class="empty-icon">😔</span><div class="empty-title">রেজাল্ট পাওয়া যায়নি</div><div class="empty-sub">রোল <strong>${roll}</strong> এর কোনো রেকর্ড নেই।</div></div>`;
+      return;
+    }
+    renderSearchResult(s,roll);
+  },600);
+}
+
+function renderSearchResult(s,roll){
+  const sems=s.semesters||[];
+  const cgpa=calcCGPANum(sems);
+  const allPass=sems.every(sm=>!sm.subjects?.some(x=>x.status==='Fail'));
+  if(allPass&&sems.length>0)confetti();
+
+  const semCards=[...sems].reverse().map((sem,i)=>{
+    const hasFail=sem.subjects?.some(s=>s.status==='Fail');
+    const hasRef=sem.subjects?.some(s=>s.status==='Referred');
+    const sp=hasFail?`<span class="pill pill-fail">❌ ফেল</span>`:hasRef?`<span class="pill pill-ref">⚠️ রেফার্ড</span>`:`<span class="pill pill-pass">✅ পাস</span>`;
+    const gpaColor=parseFloat(sem.gpa)>=3.5?'var(--green2)':parseFloat(sem.gpa)>=2.5?'var(--orange)':'var(--red)';
+    const gpaW=Math.min(100,(parseFloat(sem.gpa)||0)/4*100);
+    const rows=(sem.subjects||[]).map(sub=>{
+      const g=grade(sub.marks);
+      const mc=sub.status==='Fail'?'m-fail':sub.status==='Referred'?'m-ref':'m-pass';
+      const pc=sub.status==='Fail'?'pill-fail':sub.status==='Referred'?'pill-ref':'pill-pass';
+      const pt=sub.status==='Fail'?'ফেল':sub.status==='Referred'?'রেফার্ড':'পাস';
+      return `<tr><td style="color:var(--text3)">${sub.code||'—'}</td><td>${sub.name}</td><td class="${mc}">${sub.marks??'—'}</td><td><span class="grade-b ${g.cls}">${g.l}</span></td><td><span class="pill ${pc}" style="padding:2px 7px;font-size:10px">${pt}</span></td></tr>`;
+    }).join('');
+    const pubDate=sem.publishDate||'';
+    return `<div class="sem-result-card" id="src-${i}" style="animation:pIn .4s ease ${0.05*i}s both">
+      <div class="src-head" onclick="toggleSRC(${i})">
+        <div class="src-head-left">
+          <div class="src-num">${i+1}</div>
+          <div>
+            <div class="src-sem-name">${sem.semester} Semester</div>
+            ${pubDate?`<div class="src-date">📅 Published: <span style="color:var(--blue2)">${pubDate}</span></div>`:''}
+          </div>
+        </div>
+        <div class="src-right">
+          ${sp}
+          <div class="gpa-display"><div class="gpa-label">GPA</div><div class="gpa-num">${sem.gpa||'—'}</div></div>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="src-body">
+        <div class="gpa-bar-row"><div class="gpa-bar-inner"><div style="font-size:11px;color:var(--text3);min-width:50px">GPA</div><div class="gpa-bar-bg"><div class="gpa-bar-fg" style="width:${gpaW}%;background:${gpaColor};"></div></div><div class="gpa-bar-val" style="color:${gpaColor}">${sem.gpa}</div></div></div>
+        <table class="sub-table"><thead><tr><th>কোড</th><th>বিষয়</th><th>মার্কস</th><th>গ্রেড</th><th>ফলাফল</th></tr></thead><tbody>${rows||noCols()}</tbody></table>
+      </div>
+    </div>`;
+  }).join('');
+
+  const html=`
+  <div style="animation:pIn .4s ease">
+    <div class="result-header">
+      <div class="r-roll"># ${roll}</div>
+      <div class="r-meta-row">
+        <div class="r-meta-chip">👤 <strong>${s.name}</strong></div>
+        <div class="r-meta-chip">🏫 <strong>${s.institute || 'Unknown Institute'}</strong></div>
+        ${s.technology?`<div class="r-meta-chip">💻 <strong>${s.technology}</strong></div>`:''}
+        <div class="r-meta-chip">📚 Diploma in Engineering</div>
+        ${s.regulation?`<div class="r-meta-chip">📋 Regulation ${s.regulation}</div>`:''}
+      </div>
+    </div>
+
+    <div class="sec-title" style="margin-bottom:10px;">সেমিস্টারভিত্তিক রেজাল্ট</div>
+    ${semCards||'<div class="empty-state"><span class="empty-icon">📭</span><div class="empty-title">কোনো সেমিস্টার নেই</div></div>'}
+
+    <div class="cgpa-summary" style="margin-top:12px;">
+      <div class="cgpa-left"><div class="label">সামগ্রিক CGPA</div><div class="val">${cgpa}</div></div>
+      <div class="cgpa-right">
+        <div class="status" style="color:${allPass?'var(--green2)':'var(--orange)'}">${allPass?'সব সেমিস্টারে পাস 🎉':'কিছু বিষয়ে সমস্যা'}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:4px">${sems.length}টি সেমিস্টার</div>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="action-btn" onclick="downloadPDF('${roll}')">⬇️ PDF</button>
+      <button class="action-btn" onclick="copyInfo('${roll}')">📋 Copy</button>
+      <button class="action-btn" onclick="shareResult('${roll}')">🔗 Share</button>
+    </div>
+
+    <div class="chart-card">
+      <div class="sec-title">GPA ট্রেন্ড</div>
+      <canvas id="search-gpa-chart" height="120"></canvas>
+    </div>
+  </div>`;
+
+  document.getElementById('result-area').style.display='block';
+  document.getElementById('result-area').innerHTML=html;
+  setTimeout(()=>buildGPAChart('search-gpa-chart',sems),300);
+}
+
+function noCols(){return '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:18px">বিষয় নেই</td></tr>';}
+function toggleSRC(i){document.getElementById('src-'+i).classList.toggle('open');}
+
+/* ══════════════════════════════════
+   USER / PROFILE
+══════════════════════════════════ */
+let photoDataURL=null;
+function handlePhoto(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{photoDataURL=ev.target.result;document.getElementById('photo-thumb').innerHTML=`<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;}
+  r.readAsDataURL(f);
+}
+function handlePhotoChange(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    if(!currentUser)return;
+    currentUser.photo=ev.target.result;
+    USERS[currentUser.roll]=currentUser;
+    localStorage.setItem('bteb_current_user',JSON.stringify(currentUser));
+    saveUsers();renderProfileView();
+  }
+  r.readAsDataURL(f);
+}
+
+function switchAuthTab(tab){
+  const isLogin = tab === 'login';
+  document.getElementById('auth-login-tab').style.display = isLogin ? 'block' : 'none';
+  document.getElementById('auth-reg-tab').style.display = isLogin ? 'none' : 'block';
+  const loginBtn = document.getElementById('tab-login-btn');
+  const regBtn = document.getElementById('tab-reg-btn');
+  if(isLogin){
+    loginBtn.style.cssText='flex:1;padding:10px;border-radius:8px;font-family:\'Hind Siliguri\',sans-serif;font-size:14px;font-weight:600;cursor:pointer;background:linear-gradient(135deg,var(--s2),var(--s1));color:var(--gold);border:1px solid rgba(246,201,14,.2);transition:all .2s;';
+    regBtn.style.cssText='flex:1;padding:10px;border:none;border-radius:8px;font-family:\'Hind Siliguri\',sans-serif;font-size:14px;font-weight:600;cursor:pointer;background:none;color:var(--text3);transition:all .2s;';
+  } else {
+    regBtn.style.cssText='flex:1;padding:10px;border-radius:8px;font-family:\'Hind Siliguri\',sans-serif;font-size:14px;font-weight:600;cursor:pointer;background:linear-gradient(135deg,var(--s2),var(--s1));color:var(--gold);border:1px solid rgba(246,201,14,.2);transition:all .2s;';
+    loginBtn.style.cssText='flex:1;padding:10px;border:none;border-radius:8px;font-family:\'Hind Siliguri\',sans-serif;font-size:14px;font-weight:600;cursor:pointer;background:none;color:var(--text3);transition:all .2s;';
+  }
+}
+
+function doLogin(){
+  const roll = document.getElementById('login-roll').value.trim();
+  if(!roll){toast('রোল নম্বর দিন','warning');return;}
+
+  const user = USERS[roll];
+  if(!user){
+    toast('এই রোলে কোনো account নেই। প্রথমে Register করুন।','error');
+    switchAuthTab('register');
+    return;
+  }
+
+  currentUser = user;
+  localStorage.setItem('bteb_current_user', JSON.stringify(user));
+  updateTopbar();
+  renderProfileView();
+  toast('Login সফল! স্বাগতম '+user.name+' 🎉','success');
+}
+
+function doRegister(){
+  const roll=document.getElementById('reg-roll').value.trim();
+  const name=document.getElementById('reg-name').value.trim();
+  const tech=document.getElementById('reg-tech').value;
+  const season=document.getElementById('reg-season').value;
+  const inst=document.getElementById('reg-inst').value.trim();
+  if(!roll||!name){toast('রোল নম্বর ও নাম আবশ্যক','warning');return;}
+  const user={roll,name,tech,season,institute:inst,photo:photoDataURL||null};
+  USERS[roll]=user;currentUser=user;
+  saveUsers();localStorage.setItem('bteb_current_user',JSON.stringify(user));
+  updateTopbar();renderProfileView();
+  toast('Profile তৈরি হয়েছে! 🎉','success');
+}
+
+function doLogout(){
+  currentUser=null;photoDataURL=null;
+  localStorage.removeItem('bteb_current_user');
+  updateTopbar();
+  document.getElementById('login-view').style.display='block';
+  document.getElementById('profile-view').style.display='none';
+  toast('Logout সফল','success');
+}
+
+function updateTopbar(){
+  const tr=document.getElementById('topbar-right');
+  if(currentUser){
+    const img=currentUser.photo?`<img src="${currentUser.photo}" class="avatar-top">`:`<div class="avatar-placeholder">😊</div>`;
+    tr.innerHTML=`<div onclick="gotoPage('profile')" style="cursor:pointer;display:flex;align-items:center;gap:8px;">${img}<span style="font-size:13px;font-weight:600;color:var(--text2);max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${currentUser.name}</span></div>`;
+  }else{
+    tr.innerHTML=`<button class="login-btn-top" onclick="gotoPage('profile')">👤 Login</button>`;
+  }
+}
+
+function renderProfileView(){
+  if(!currentUser)return;
+  document.getElementById('login-view').style.display='none';
+  document.getElementById('profile-view').style.display='block';
+  // avatar
+  const pav=document.getElementById('pav');
+  if(currentUser.photo){pav.outerHTML=`<img class="profile-avatar" id="pav" src="${currentUser.photo}">`;}
+  else{document.getElementById('pav').textContent='😊';}
+  document.getElementById('p-name').textContent=currentUser.name;
+  document.getElementById('p-roll').textContent='রোল: '+currentUser.roll;
+  document.getElementById('p-tech').textContent=currentUser.tech||'—';
+  document.getElementById('p-season').textContent=currentUser.season||'—';
+  document.getElementById('p-inst').textContent=currentUser.institute || s?.institute || 'Unknown Institute';
+
+  const s=DB[currentUser.roll];
+  const sems=s?.semesters||[];
+  const cgpa=calcCGPANum(sems);
+  document.getElementById('ps-total').textContent=sems.length;
+  document.getElementById('ps-cgpa').textContent=cgpa;
+  document.getElementById('ps-pass').textContent=sems.filter(s=>!s.subjects?.some(x=>x.status==='Fail')).length;
+  document.getElementById('ps-fail').textContent=sems.filter(s=>s.subjects?.some(x=>x.status==='Fail'||x.status==='Referred')).length;
+
+  setTimeout(()=>buildGPAChart('profile-chart',sems),200);
+  // render result
+  document.getElementById('profile-result-area').innerHTML='';
+  if(s&&sems.length>0){
+    const semCards=[...sems].reverse().map((sem,i)=>{
+      const hasFail=sem.subjects?.some(s=>s.status==='Fail');
+      const hasRef=sem.subjects?.some(s=>s.status==='Referred');
+      const sp=hasFail?`<span class="pill pill-fail">❌ ফেল</span>`:hasRef?`<span class="pill pill-ref">⚠️ রেফার্ড</span>`:`<span class="pill pill-pass">✅ পাস</span>`;
+      const gpaColor=parseFloat(sem.gpa)>=3.5?'var(--green2)':parseFloat(sem.gpa)>=2.5?'var(--orange)':'var(--red)';
+      const gpaW=Math.min(100,(parseFloat(sem.gpa)||0)/4*100);
+      const rows=(sem.subjects||[]).map(sub=>{
+        const g=grade(sub.marks);
+        const mc=sub.status==='Fail'?'m-fail':sub.status==='Referred'?'m-ref':'m-pass';
+        const pc=sub.status==='Fail'?'pill-fail':sub.status==='Referred'?'pill-ref':'pill-pass';
+        const pt=sub.status==='Fail'?'ফেল':sub.status==='Referred'?'রেফার্ড':'পাস';
+        return `<tr><td style="color:var(--text3)">${sub.code||'—'}</td><td>${sub.name}</td><td class="${mc}">${sub.marks??'—'}</td><td><span class="grade-b ${g.cls}">${g.l}</span></td><td><span class="pill ${pc}" style="padding:2px 7px;font-size:10px">${pt}</span></td></tr>`;
+      }).join('');
+      return `<div class="sem-result-card" id="prc-${i}">
+        <div class="src-head" onclick="document.getElementById('prc-${i}').classList.toggle('open')">
+          <div class="src-head-left"><div class="src-num">${i+1}</div><div class="src-sem-name">${sem.semester} Semester</div></div>
+          <div class="src-right">${sp}<div class="gpa-display"><div class="gpa-label">GPA</div><div class="gpa-num">${sem.gpa||'—'}</div></div><span class="chevron">▼</span></div>
+        </div>
+        <div class="src-body">
+          <div class="gpa-bar-row"><div class="gpa-bar-inner"><div class="gpa-bar-bg"><div class="gpa-bar-fg" style="width:${gpaW}%;background:${gpaColor}"></div></div><div class="gpa-bar-val" style="color:${gpaColor}">${sem.gpa}</div></div></div>
+          <table class="sub-table"><thead><tr><th>কোড</th><th>বিষয়</th><th>মার্কস</th><th>গ্রেড</th><th>ফলাফল</th></tr></thead><tbody>${rows}</tbody></table>
+        </div>
+      </div>`;
+    }).join('');
+    document.getElementById('profile-result-area').innerHTML=`<div class="sec-title" style="margin-bottom:10px;">আমার সেমিস্টার</div>${semCards}`;
+  }else{
+    document.getElementById('profile-result-area').innerHTML=`<div class="empty-state"><span class="empty-icon">📭</span><div class="empty-title">রেজাল্ট পাওয়া যায়নি</div><div class="empty-sub">আপনার রোলের ডেটা পাওয়া যায়নি।</div></div>`;
+  }
+}
+
+/* ══════════════════════════════════
+   INSTITUTE
+══════════════════════════════════ */
+let instCharts={};
+function renderInstList(){
+  const q=(document.getElementById('inst-search-inp')?.value||'').toLowerCase().trim();
+  // Build institute map from DB
+  const instMap={};
+  Object.keys(DB).forEach(roll=>{
+    const s=DB[roll];
+    const inst=s.institute||'অজানা প্রতিষ্ঠান';
+    if(!instMap[inst])instMap[inst]={name:inst,students:[]};
+    instMap[inst].students.push({roll,...s});
+  });
+  const insts=Object.values(instMap).filter(i=>!q||i.name.toLowerCase().includes(q));
+  const listEl=document.getElementById('inst-list');
+  if(!insts.length){listEl.innerHTML=`<div class="empty-state"><span class="empty-icon">🏫</span><div class="empty-title">কোনো প্রতিষ্ঠান নেই</div><div class="empty-sub">Database এ ডেটা যোগ করুন।</div></div>`;return;}
+  listEl.innerHTML=insts.map((inst,ii)=>{
+    const sems=new Set();
+    inst.students.forEach(s=>(s.semesters||[]).forEach(sm=>sems.add(sm.semester)));
+    const semArr=Array.from(sems).sort();
+    const semBoxes=semArr.map(sem=>`<div class="inst-sem-box" onclick="showInstSem('${inst.name}','${sem}',this)"><div class="s-name">${sem}</div><div class="s-num">${instSemCount(inst,sem)}</div></div>`).join('');
+    return `<div class="inst-card">
+      <div class="inst-name">🏫 ${inst.name}</div>
+      <div class="inst-meta">মোট ছাত্র: <strong>${inst.students.length}</strong> · সেমিস্টার: <strong>${semArr.length}</strong></div>
+      <div class="sec-title">সেমিস্টার বেছে নিন</div>
+      <div class="inst-sem-row">${semBoxes||'<div style="color:var(--text3);font-size:13px">সেমিস্টার নেই</div>'}</div>
+      <div class="inst-detail" id="inst-detail-${ii}"></div>
+    </div>`;
+  }).join('');
+}
+
+function instSemCount(inst,sem){return inst.students.filter(s=>(s.semesters||[]).some(sm=>sm.semester===sem)).length;}
+
+function showInstSem(instName,sem,btn){
+  const card=btn.closest('.inst-card');
+  const detail=card.querySelector('.inst-detail');
+  btn.closest('.inst-sem-row').querySelectorAll('.inst-sem-box').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  detail.classList.add('show');
+
+  const instMap={};
+  Object.keys(DB).forEach(roll=>{const s=DB[roll];const i=s.institute||'অজানা প্রতিষ্ঠান';if(!instMap[i])instMap[i]=[];instMap[i].push({roll,...s});});
+  const students=instMap[instName]||[];
+  let total=0,passed=0,failed=0,referred=0;
+  const gpas=[];
+  students.forEach(s=>{
+    (s.semesters||[]).filter(sm=>sm.semester===sem).forEach(sm=>{
+      total++;
+      const hasFail=sm.subjects?.some(x=>x.status==='Fail');
+      const hasRef=sm.subjects?.some(x=>x.status==='Referred');
+      if(hasFail)failed++;else if(hasRef)referred++;else passed++;
+      if(sm.gpa)gpas.push(parseFloat(sm.gpa));
+    });
+  });
+  const avgGpa=gpas.length?( gpas.reduce((a,b)=>a+b,0)/gpas.length).toFixed(2):'—';
+  const passRate=total?Math.round(passed/total*100):0;
+  const failRate=total?Math.round(failed/total*100):0;
+  const refRate=total?Math.round(referred/total*100):0;
+  const chartId='instChart_'+instName.replace(/\s/g,'_')+'_'+sem;
+
+  detail.innerHTML=`
+    <div class="sec-title">${sem} Semester — ${instName}</div>
+    <div class="stat-row">
+      <div class="stat-box"><div class="sn">${total}</div><div class="sl">মোট পরীক্ষার্থী</div></div>
+      <div class="stat-box"><div class="sn stat-green">${passed}</div><div class="sl">পাস (${passRate}%)</div></div>
+      <div class="stat-box"><div class="sn stat-red">${failed}</div><div class="sl">ফেল (${failRate}%)</div></div>
+    </div>
+    <div class="stat-row" style="grid-template-columns:1fr 1fr;">
+      <div class="stat-box"><div class="sn stat-orange">${referred}</div><div class="sl">রেফার্ড (${refRate}%)</div></div>
+      <div class="stat-box"><div class="sn" style="color:var(--blue2)">${avgGpa}</div><div class="sl">গড় GPA</div></div>
+    </div>
+    <div class="chart-card" style="margin-top:10px;">
+      <div class="sec-title">পাস/ফেল চার্ট</div>
+      <canvas id="${chartId}" height="140"></canvas>
+    </div>`;
+
+  setTimeout(()=>{
+    const ctx=document.getElementById(chartId);if(!ctx)return;
+    if(instCharts[chartId])instCharts[chartId].destroy();
+    instCharts[chartId]=new Chart(ctx,{
+      type:'doughnut',
+      data:{labels:['পাস','ফেল','রেফার্ড'],datasets:[{data:[passed,failed,referred],backgroundColor:['rgba(72,187,120,.7)','rgba(252,129,129,.7)','rgba(246,173,85,.7)'],borderColor:['rgba(72,187,120,1)','rgba(252,129,129,1)','rgba(246,173,85,1)'],borderWidth:2,hoverOffset:6}]},
+      options:{responsive:true,plugins:{legend:{labels:{color:'#a0aec0',font:{size:12}}},tooltip:{backgroundColor:'#0b1629',titleColor:'#e2e8f0',bodyColor:'#a0aec0'}},cutout:'60%'}
+    });
+  },200);
+}
+
+/* ══════════════════════════════════
+   GPA CALCULATOR
+══════════════════════════════════ */
+let calcRows=[];
+let cgpaRows=[];
+function initCalc(){
+  calcRows=[];cgpaRows=[];
+  for(let i=0;i<5;i++)calcRows.push({name:'',marks:''});
+  for(let i=0;i<4;i++)cgpaRows.push('');
+  renderCalcRows();renderCGPARows();
+}
+function addCalcRow(){calcRows.push({name:'',marks:''});renderCalcRows();}
+function addCGPARow(){cgpaRows.push('');renderCGPARows();}
+function renderCalcRows(){
+  document.getElementById('calc-list').innerHTML=calcRows.map((r,i)=>`
+    <div class="calc-row">
+      <input class="inp" placeholder="বিষয়ের নাম" value="${r.name}" oninput="calcRows[${i}].name=this.value" style="flex:2">
+      <input class="inp inp-sm" type="number" placeholder="মার্কস" value="${r.marks}" oninput="calcRows[${i}].marks=this.value" min="0" max="100">
+      <button class="del-btn" onclick="calcRows.splice(${i},1);renderCalcRows()">✕</button>
+    </div>`).join('');
+}
+function renderCGPARows(){
+  document.getElementById('cgpa-list').innerHTML=cgpaRows.map((v,i)=>`
+    <div class="calc-row">
+      <input class="inp" placeholder="${i+1} সেমিস্টার GPA" type="number" step=".01" min="0" max="4" value="${v}" oninput="cgpaRows[${i}]=this.value">
+      <button class="del-btn" onclick="cgpaRows.splice(${i},1);renderCGPARows()">✕</button>
+    </div>`).join('');
+}
+function calcGPA(){
+  const valid=calcRows.filter(r=>r.marks!=='');
+  if(!valid.length){toast('মার্কস দিন','warning');return;}
+  const total=valid.reduce((a,r)=>{
+    const m=parseFloat(r.marks)||0;
+    let p=0;
+    if(m>=80)p=4.0;else if(m>=75)p=3.75;else if(m>=70)p=3.5;else if(m>=65)p=3.25;else if(m>=60)p=3.0;else if(m>=55)p=2.75;else if(m>=50)p=2.5;else if(m>=45)p=2.25;else if(m>=40)p=2.0;else p=0;
+    return a+p;
+  },0);
+  const gpa=(total/valid.length).toFixed(2);
+  const gl=parseFloat(gpa)>=3.75?'A+ (অসাধারণ)':parseFloat(gpa)>=3.5?'A (চমৎকার)':parseFloat(gpa)>=3.0?'B+ (ভালো)':parseFloat(gpa)>=2.5?'B (মোটামুটি)':parseFloat(gpa)>=2.0?'C (গড়)':'F (অকৃতকার্য)';
+  const gradeColor=parseFloat(gpa)>=3.5?'var(--green2)':parseFloat(gpa)>=2.5?'var(--orange)':'var(--red)';
+  document.getElementById('gpa-result-num').textContent=gpa;
+  document.getElementById('gpa-result-grade').innerHTML=`<span style="color:${gradeColor}">${gl}</span>`;
+  document.getElementById('gpa-result-box').classList.add('show');
+}
+function calcCGPA(){
+  const valid=cgpaRows.filter(v=>v!=='').map(v=>parseFloat(v)||0);
+  if(!valid.length){toast('GPA দিন','warning');return;}
+  const cgpa=(valid.reduce((a,b)=>a+b,0)/valid.length).toFixed(2);
+  document.getElementById('cgpa-result-num').textContent=cgpa;
+  document.getElementById('cgpa-result-box').classList.add('show');
+}
+function resetCalc(){initCalc();document.getElementById('gpa-result-box').classList.remove('show');document.getElementById('cgpa-result-box').classList.remove('show');}
+
+/* ══════════════════════════════════
+   ADMIN
+══════════════════════════════════ */
+function checkPass(){
+  const v=document.getElementById('pass-input').value;
+  if(v===ADMIN_PASS){
+    adminLoggedIn=true;
+    document.getElementById('admin-gate-view').style.display='none';
+    document.getElementById('admin-panel-view').style.display='block';
+    updateAdmStats();renderAdmList();
+    toast('Admin Panel এ স্বাগতম! 🎉','success');
+  }else{
+    document.getElementById('pass-input').value='';
+    document.getElementById('pass-input').style.borderColor='rgba(252,129,129,.5)';
+    setTimeout(()=>document.getElementById('pass-input').style.borderColor='',1000);
+    Swal.fire({icon:'error',title:'ভুল পাসওয়ার্ড',background:'#0b1629',color:'#e2e8f0',confirmButtonColor:'#b45309'});
+  }
+}
+function doAdminLogout(){
+  adminLoggedIn=false;
+  document.getElementById('admin-gate-view').style.display='block';
+  document.getElementById('admin-panel-view').style.display='none';
+  document.getElementById('pass-input').value='';
+  // Remove admin tab from nav
+  const btn=document.getElementById('admin-nav-btn');
+  if(btn)btn.remove();
+  gotoPage('home');
+}
+function updateAdmStats(){
+  const rolls=Object.keys(DB);
+  let sems=0;
+  rolls.forEach(r=>sems+=(DB[r].semesters||[]).length);
+  const e=id=>document.getElementById(id);
+  if(e('adm-students'))e('adm-students').textContent=rolls.length;
+  if(e('adm-semesters'))e('adm-semesters').textContent=sems;
+}
+function renderAdmList(){
+  const q=(document.getElementById('adm-search')?.value||'').toLowerCase();
+  const keys=Object.keys(DB).filter(r=>!q||r.includes(q)||DB[r].name?.toLowerCase().includes(q));
+  const el=document.getElementById('adm-db-list');
+  if(!keys.length){el.innerHTML=`<div style="padding:20px;text-align:center;color:var(--text3)">কোনো রেকর্ড নেই</div>`;return;}
+  el.innerHTML=keys.slice(0,80).map(r=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-weight:600;font-size:14px">${DB[r].name||'অজানা'}</div>
+        <div style="font-size:11px;color:var(--text3)">রোল: ${r} · ${DB[r].technology||'—'} · ${DB[r].semesters?.length||0} সেম.</div>
+      </div>
+      <button onclick="delStudent('${r}')" style="width:28px;height:28px;border-radius:7px;background:rgba(252,129,129,.1);border:1px solid rgba(252,129,129,.2);color:var(--red);cursor:pointer;font-size:13px;">🗑️</button>
+    </div>`).join('');
+  if(keys.length>80)el.innerHTML+=`<div style="padding:10px;text-align:center;color:var(--text3);font-size:12px">আরও ${keys.length-80} রেকর্ড — খুঁজুন</div>`;
+}
+function delStudent(roll){
+  Swal.fire({title:'মুছবেন?',text:`রোল ${roll} এর ডেটা মুছে যাবে।`,icon:'warning',showCancelButton:true,
+    confirmButtonText:'মুছুন',cancelButtonText:'বাতিল',background:'#0b1629',color:'#e2e8f0',confirmButtonColor:'#e53e3e'
+  }).then(r=>{if(r.isConfirmed){delete DB[roll];saveDB();renderAdmList();updateAdmStats();toast('মুছে ফেলা হয়েছে','success');}});
+}
+function exportDB(){
+  const b=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bteb_db.json';a.click();
+  toast('Export সম্পন্ন','success');
+}
+function importDB(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.json';
+  inp.onchange=e=>{
+    const fr=new FileReader();
+    fr.onload=ev=>{
+      try{
+        const d=JSON.parse(ev.target.result);
+        const c=Object.keys(d).length;
+        Swal.fire({title:'Import?',text:`${c} রেকর্ড merge হবে`,icon:'question',showCancelButton:true,
+          confirmButtonText:'হ্যাঁ',background:'#0b1629',color:'#e2e8f0',confirmButtonColor:'#b45309'
+        }).then(r=>{if(r.isConfirmed){DB={...DB,...d};saveDB();renderAdmList();updateAdmStats();toast(`${c} রেকর্ড import হয়েছে`,'success');}});
+      }catch(e){toast('JSON ভুল','error');}
+    };fr.readAsText(e.target.files[0]);
+  };inp.click();
+}
+function clearDB(){
+  Swal.fire({title:'সব মুছবেন?',icon:'warning',showCancelButton:true,
+    confirmButtonText:'মুছুন',cancelButtonText:'বাতিল',background:'#0b1629',color:'#e2e8f0',confirmButtonColor:'#e53e3e'
+  }).then(r=>{if(r.isConfirmed){DB={};saveDB();renderAdmList();updateAdmStats();toast('Database পরিষ্কার','success');}});
+}
+
+/* ── PDF UPLOAD & PARSE ── */
+function handleAdmFiles(e){
+  selectedAdmFiles=Array.from(e.target.files);
+  _updateUploadZone();
+}
+function handleAdmDrop(e){
+  e.preventDefault();
+  document.getElementById('adm-upload-zone').style.borderColor='rgba(99,179,237,.25)';
+  selectedAdmFiles=Array.from(e.dataTransfer.files).filter(f=>f.name.endsWith('.pdf'));
+  _updateUploadZone();
+}
+function _updateUploadZone(){
+  if(!selectedAdmFiles.length)return;
+  document.getElementById('adm-upload-zone').innerHTML=`
+    <div style="font-size:32px;margin-bottom:8px">✅</div>
+    <div style="font-weight:600">${selectedAdmFiles.length}টি ফাইল বেছে নেওয়া হয়েছে</div>
+    <div style="font-size:12px;color:var(--text3)">${selectedAdmFiles.map(f=>f.name).join(', ')}</div>`;
+  document.getElementById('adm-parse-btn').style.display='block';
+}
+function admLog(msg,t='info'){
+  const b=document.getElementById('adm-log');b.style.display='block';
+  const d=document.createElement('div');
+  d.style.color=t==='ok'?'#68d391':t==='err'?'#fc8181':t==='warn'?'#f6ad55':'#90cdf4';
+  d.textContent=`[${new Date().toLocaleTimeString()}] ${msg}`;
+  b.appendChild(d);b.scrollTop=b.scrollHeight;
+}
+
+async function runAdmParse(){
+  if(!selectedAdmFiles.length)return;
+  document.getElementById('adm-progress').style.display='block';
+  document.getElementById('adm-log').style.display='block';
+  document.getElementById('adm-log').innerHTML='';
+  let totalAdded=0;
+
+  for(let fi=0;fi<selectedAdmFiles.length;fi++){
+    const f=selectedAdmFiles[fi];
+    admLog(`📄 "${f.name}" পড়া শুরু...`);
+    try{
+      const buf=await f.arrayBuffer();
+      const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+      const np=pdf.numPages;
+      admLog(`${np} পেজ পাওয়া গেছে`);
+      let fullText='';
+      for(let p=1;p<=np;p++){
+        const pg=await pdf.getPage(p);
+        const ct=await pg.getTextContent();
+        fullText+=ct.items.map(i=>i.str).join(' ')+'\n';
+        const pct=Math.round(((fi*np+p)/(selectedAdmFiles.length*np))*100);
+        document.getElementById('adm-prog-fill').style.width=pct+'%';
+        document.getElementById('adm-prog-text').textContent=`পেজ ${p}/${np} পড়া হচ্ছে...`;
+      }
+      const added=parseBTEBResult(fullText,f.name);
+      totalAdded+=added;
+      admLog(`✅ ${added} রেকর্ড যোগ হয়েছে`,'ok');
+    }catch(err){
+      admLog(`❌ Error: ${err.message}`,'err');
+    }
+  }
+
+  document.getElementById('adm-prog-fill').style.width='100%';
+  document.getElementById('adm-prog-text').textContent=`সম্পন্ন! মোট ${totalAdded} রেকর্ড।`;
+  saveDB();renderAdmList();updateAdmStats();
+  admLog(`🎉 সর্বমোট ${totalAdded} রেকর্ড DB তে save হয়েছে।`,'ok');
+  Swal.fire({icon:'success',title:'সম্পন্ন!',text:`${totalAdded} রেকর্ড import হয়েছে।`,
+    background:'#0b1629',color:'#e2e8f0',confirmButtonColor:'#b45309'});
+}
+
+/* ── BTEB Official PDF Parser ──
+   Format: 732320 (gpa4: 3.20, gpa3: 2.63, gpa2: 2.96, gpa1: 3.53)
+   Referred: 800003 { gpa4: ref, gpa3: 3.65, gpa2: 3.74, gpa1: ref, ref_sub: 25911(T), 26811(T) }
+   Institute line: 12053 - Thakurgaon Polytechnic Institute, Thakurgaon
+   Semester from context: "4th Semester (2022 Regulation)"
+*/
+function parseBTEBResult(text, filename){
+  let added=0;
+
+  // Detect which semester this PDF is about
+  const semMatch = text.match(/(\d+(?:st|nd|rd|th))\s+Semester/i);
+  const currentSem = semMatch ? semMatch[1] : '?';
+  const regMatch = text.match(/\((\d{4})\s+Regulation\)/i);
+  const regulation = regMatch ? regMatch[1] : '2022';
+
+  admLog(`সেমিস্টার: ${currentSem}, Regulation: ${regulation}`);
+
+  // Extract institute name — pattern: digits - Institute Name
+  let currentInstitute = '';
+  const instRegex = /\d{5}\s*-\s*([^\n\r]+?)(?:\s*\n|\s{3,}|$)/g;
+
+  // Process full text line by line
+  // Merge wrapped lines first
+  const cleaned = text.replace(/\n/g,' ').replace(/\s{2,}/g,' ');
+
+  // Pattern for PASSED students: roll (gpa4: X.XX, gpa3: X.XX, gpa2: X.XX, gpa1: X.XX)
+  const passPattern = /(\d{6})\s*\(\s*gpa4:\s*([\d.]+),\s*gpa3:\s*([\d.]+),\s*gpa2:\s*([\d.]+),\s*gpa1:\s*([\d.]+)\s*\)/g;
+
+  // Pattern for REFERRED students: roll { gpa4: ref/X.XX, gpa3: ref/X.XX, ..., ref_sub: codes }
+  const refPattern = /(\d{6})\s*\{\s*gpa4:\s*(ref|[\d.]+),\s*gpa3:\s*(ref|[\d.]+),\s*gpa2:\s*(ref|[\d.]+),\s*gpa1:\s*(ref|[\d.]+)(?:,\s*ref_sub:\s*([^}]+))?\s*\}/g;
+
+  // Extract institute per block by scanning original text
+  const lines = text.split('\n');
+  const instMap = {}; // roll_prefix -> institute
+  for(let i=0;i<lines.length;i++){
+    const im = lines[i].match(/^\s*\d{5}\s*-\s*(.+)$/);
+    if(im) currentInstitute = im[1].trim();
+    // store institute for rolls found near this line
+    const rollsNearby = lines.slice(i,i+30).join(' ').match(/\b\d{6}\b/g)||[];
+    rollsNearby.forEach(r=>{ if(!instMap[r]) instMap[r]=currentInstitute; });
+  }
+
+  // Parse passed students
+  let m;
+  while((m=passPattern.exec(cleaned))!==null){
+    const roll=m[1];
+    const gpas={gpa4:parseFloat(m[2]),gpa3:parseFloat(m[3]),gpa2:parseFloat(m[4]),gpa1:parseFloat(m[5])};
+    _upsertStudent(roll,gpas,{},currentSem,regulation,instMap[roll]||'');
+    added++;
+  }
+
+  // Parse referred/failed students
+  while((m=refPattern.exec(cleaned))!==null){
+    const roll=m[1];
+    const g=(v)=>v==='ref'?null:parseFloat(v);
+    const gpas={gpa4:g(m[2]),gpa3:g(m[3]),gpa2:g(m[4]),gpa1:g(m[5])};
+    const refSubStr=m[6]||'';
+    const refSubs=refSubStr.match(/\d{5}/g)||[];
+    _upsertStudent(roll,gpas,{refSubs},currentSem,regulation,instMap[roll]||'');
+    added++;
+  }
+
+  if(added===0) admLog('⚠️ কোনো roll পাওয়া যায়নি। PDF format check করুন।','warn');
+  return added;
+}
+
+function _upsertStudent(roll, gpas, extra, currentSem, regulation, institute){
+  if(!DB[roll]){
+    DB[roll]={name:roll, technology:'', institute:institute||'', regulation:regulation, semesters:[]};
+  }
+  if(institute) DB[roll].institute=institute;
+  if(regulation) DB[roll].regulation=regulation;
+
+  // সেমিস্টার ম্যাপ: gpa1=1st, gpa2=2nd, gpa3=3rd, gpa4=4th
+  const semMap={'1':'1st','2':'2nd','3':'3rd','4':'4th','5':'5th','6':'6th','7':'7th','8':'8th'};
+  const currentSemNum=parseInt(currentSem)||4;
+
+  // Update all semesters that have GPA data
+  for(let i=1;i<=currentSemNum;i++){
+    const gpaKey=`gpa${i}`;
+    const gpaVal=gpas[gpaKey];
+    const semName=semMap[String(i)]||`${i}th`;
+    const isRef=(gpaVal===null);
+
+    // Check if this semester already exists
+    const exIdx=DB[roll].semesters.findIndex(s=>s.semester===semName);
+
+    // Referred subjects only apply to current semester
+    const refSubs=(i===currentSemNum && extra.refSubs)||[];
+    const subjects=refSubs.map(code=>({code,name:'Subject '+code,marks:null,status:'Referred'}));
+
+    const semObj={
+      semester: semName,
+      gpa: isRef ? 0 : (gpaVal||0),
+      result: isRef ? 'Referred' : 'Passed',
+      subjects: subjects
+    };
+
+    if(exIdx>=0) DB[roll].semesters[exIdx]=semObj;
+    else DB[roll].semesters.push(semObj);
+  }
+
+  // Sort semesters
+  const order={'1st':1,'2nd':2,'3rd':3,'4th':4,'5th':5,'6th':6,'7th':7,'8th':8};
+  DB[roll].semesters.sort((a,b)=>(order[a.semester]||9)-(order[b.semester]||9));
+}
+
+/* ══════════════════════════════════
+   HELPERS
+══════════════════════════════════ */
+function grade(m){
+  if(m===null||m===undefined||m==='')return{l:'—',cls:'gF'};
+  if(m>=80)return{l:'A+',cls:'gA'};if(m>=70)return{l:'A',cls:'gA'};
+  if(m>=60)return{l:'B',cls:'gB'};if(m>=50)return{l:'C',cls:'gC'};
+  if(m>=40)return{l:'D',cls:'gD'};return{l:'F',cls:'gF'};
+}
+function calcCGPANum(sems){
+  const v=sems.filter(s=>s.gpa&&!isNaN(s.gpa));
+  if(!v.length)return '—';
+  return (v.reduce((a,b)=>a+parseFloat(b.gpa),0)/v.length).toFixed(2);
+}
+function buildGPAChart(canvasId,sems){
+  const ctx=document.getElementById(canvasId);if(!ctx)return;
+  if(canvasId==='profile-chart'&&profileChartInst){profileChartInst.destroy();}
+  const ch=new Chart(ctx,{
+    type:'line',
+    data:{labels:sems.map(s=>s.semester),datasets:[{label:'GPA',data:sems.map(s=>parseFloat(s.gpa)||0),borderColor:'#63b3ed',backgroundColor:'rgba(99,179,237,.08)',tension:.4,fill:true,pointBackgroundColor:'#f6c90e',pointBorderColor:'#f6c90e',pointRadius:5,pointHoverRadius:7,borderWidth:2.5}]},
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'#0b1629',borderColor:'rgba(99,179,237,.3)',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#a0aec0'}},scales:{x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#718096',font:{size:10}}},y:{min:0,max:4,grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#718096',font:{size:10}}}}}
+  });
+  if(canvasId==='profile-chart')profileChartInst=ch;
+}
+function showLoading(t){document.getElementById('loading-overlay').classList.add('show');document.getElementById('loading-text').textContent=t||'লোড হচ্ছে...';}
+function hideLoading(){document.getElementById('loading-overlay').classList.remove('show');}
+function toast(msg,type='success'){Swal.fire({toast:true,position:'top-end',icon:type,title:msg,showConfirmButton:false,timer:2200,timerProgressBar:true,background:'#0b1629',color:'#e2e8f0',didOpen:t=>{t.addEventListener('mouseenter',Swal.stopTimer);t.addEventListener('mouseleave',Swal.resumeTimer);}});}
+function confetti(){
+  const colors=['#f6c90e','#63b3ed','#68d391','#fc8181','#f6ad55','#b794f4'];
+  for(let i=0;i<50;i++){setTimeout(()=>{const c=document.createElement('div');c.className='conf';c.style.cssText=`left:${Math.random()*100}vw;top:-10px;background:${colors[i%6]};width:${5+Math.random()*7}px;height:${5+Math.random()*7}px;animation-duration:${2+Math.random()*2}s;animation-delay:${Math.random()*.4}s;`;document.body.appendChild(c);setTimeout(()=>c.remove(),3500);},i*25);}
+}
+
+/* ══════════════════════════════════
+   PDF DOWNLOAD
+══════════════════════════════════ */
+function downloadPDF(roll){
+  const s=DB[roll];if(!s)return;
+  const sems=s.semesters||[];const cgpa=calcCGPANum(sems);
+  let sh=sems.map(sem=>`<h3 style="margin:16px 0 6px;color:#1a2744;font-size:14px">${sem.semester} Semester — GPA: ${sem.gpa||'—'}</h3><table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr style="background:#f0f4ff">${['Code','Subject','Marks','Grade','Status'].map(h=>`<th style="padding:7px 10px;border:1px solid #ddd;text-align:left">${h}</th>`).join('')}</tr></thead><tbody>${(sem.subjects||[]).map(sub=>{const g=grade(sub.marks);return`<tr>${[sub.code||'',sub.name,sub.marks??'—',g.l,sub.status].map(v=>`<td style="padding:7px 10px;border:1px solid #eee">${v}</td>`).join('')}</tr>`;}).join('')}</tbody></table>`).join('');
+  const html=`<div style="font-family:Arial,sans-serif;padding:28px;max-width:680px;margin:0 auto"><div style="text-align:center;border-bottom:3px solid #1a2744;padding-bottom:18px;margin-bottom:18px"><div style="font-size:38px">🎓</div><h1 style="color:#1a2744;font-size:20px;margin:6px 0">Academic Transcript</h1><p style="color:#888;font-size:12px">Bangladesh Technical Education Board</p></div><table style="width:100%;margin-bottom:18px;font-size:13px"><tr><td style="padding:5px 0;color:#666">নাম</td><td style="font-weight:700">${s.name}</td></tr><tr><td style="padding:5px 0;color:#666">রোল</td><td>${roll}</td></tr><tr><td style="padding:5px 0;color:#666">টেকনোলজি</td><td>${s.technology||'—'}</td></tr><tr><td style="padding:5px 0;color:#666">প্রতিষ্ঠান</td><td>${s.institute||'—'}</td></tr><tr><td style="padding:5px 0;color:#666">CGPA</td><td style="font-weight:800;font-size:18px;color:#27ae60">${cgpa}</td></tr></table>${sh}<div style="margin-top:24px;text-align:center;color:#aaa;font-size:11px;border-top:1px solid #eee;padding-top:12px">Generated by BTEB Result Portal • ${new Date().toLocaleDateString()}</div></div>`;
+  html2pdf().set({margin:8,filename:`result_${roll}.pdf`,html2canvas:{scale:2},jsPDF:{unit:'mm',format:'a4'}}).from(html).save();
+  toast('PDF তৈরি হচ্ছে...','success');
+}
+function copyInfo(roll){
+  const s=DB[roll];if(!s)return;
+  const sems=s.semesters||[];const cgpa=calcCGPANum(sems);
+  let txt=`🎓 BTEB Result\n👤 ${s.name} | রোল: ${roll}\n💻 ${s.technology||'—'} | CGPA: ${cgpa}\n\n`;
+  sems.forEach(sem=>{txt+=`📚 ${sem.semester} | GPA: ${sem.gpa}\n`;(sem.subjects||[]).forEach(sub=>{txt+=`  • ${sub.name}: ${sub.marks??'—'} (${sub.status})\n`;});txt+='\n';});
+  navigator.clipboard.writeText(txt).then(()=>toast('কপি হয়েছে!','success')).catch(()=>{});
+}
+function shareResult(roll){
+  const s=DB[roll];if(!s)return;
+  if(navigator.share){navigator.share({title:'BTEB Result — '+s.name,text:`রোল ${roll} এর রেজাল্ট দেখুন`,url:window.location.href}).catch(()=>{});}
+  else{navigator.clipboard.writeText(window.location.href).then(()=>toast('লিংক কপি হয়েছে','success'));}
+}
+
+/* DEMO DATA */
+function loadDemo501(){
+  DB['501234']={name:'শান্তর নীল',technology:'CST',institute:'ঢাকা পলিটেকনিক ইনস্টিটিউট',regulation:'2022',semesters:[
+    {semester:'1st',gpa:3.70,publishDate:'11 March, 2024',result:'Passed',subjects:[{code:'61011',name:'English',marks:72,status:'Pass'},{code:'61012',name:'Mathematics',marks:80,status:'Pass'},{code:'61013',name:'Physics',marks:65,status:'Pass'},{code:'61014',name:'Chemistry',marks:58,status:'Pass'}]},
+    {semester:'2nd',gpa:3.50,publishDate:'11 March, 2025',result:'Passed',subjects:[{code:'62011',name:'English 2',marks:68,status:'Pass'},{code:'62012',name:'Mathematics 2',marks:55,status:'Pass'},{code:'62013',name:'Computer Fundamentals',marks:82,status:'Pass'},{code:'62014',name:'Electronics',marks:40,status:'Referred'}]},
+    {semester:'3rd',gpa:3.80,publishDate:'26 October, 2025',result:'Passed',subjects:[{code:'63011',name:'Programming in C',marks:88,status:'Pass'},{code:'63012',name:'Data Structure',marks:76,status:'Pass'},{code:'63013',name:'Database',marks:70,status:'Pass'},{code:'63014',name:'Web Technology',marks:84,status:'Pass'}]},
+    {semester:'4th',gpa:3.44,publishDate:'28 April, 2026',result:'Passed',subjects:[{code:'64011',name:'OOP with Java',marks:74,status:'Pass'},{code:'64012',name:'Operating System',marks:66,status:'Pass'},{code:'64013',name:'Networking',marks:72,status:'Pass'},{code:'64014',name:'Software Engineering',marks:28,status:'Fail'}]},
+  ]};
+  saveDB();
+  document.getElementById('roll-inp').value='501234';
+  doSearch('501234');
+}
+function loadDemo813(){
+  DB['813519']={name:'আরাফাত হোসেন',technology:'Civil',institute:'Institute Of Information Technology Bogra, Bogura',regulation:'2022',semesters:[
+    {semester:'2nd',gpa:3.06,publishDate:'11 March, 2025',result:'Passed',subjects:[{code:'62211',name:'Mathematics 2',marks:75,status:'Pass'},{code:'62212',name:'Physics 2',marks:68,status:'Pass'},{code:'62213',name:'Surveying',marks:72,status:'Pass'}]},
+    {semester:'3rd',gpa:3.23,publishDate:'26 October, 2025',result:'Passed',subjects:[{code:'63211',name:'Structural Analysis',marks:78,status:'Pass'},{code:'63212',name:'Soil Mechanics',marks:65,status:'Pass'},{code:'63213',name:'Hydraulics',marks:62,status:'Pass'}]},
+    {semester:'4th',gpa:3.44,publishDate:'28 April, 2026',result:'Passed',subjects:[{code:'64211',name:'RCC Design',marks:82,status:'Pass'},{code:'64212',name:'Environmental Engineering',marks:70,status:'Pass'},{code:'64213',name:'Estimating',marks:66,status:'Pass'}]},
+  ]};
+  saveDB();
+  document.getElementById('roll-inp').value='813519';
+  doSearch('813519');
+}
+
+/* ══════════════════════════════════
+   INIT
+══════════════════════════════════ */
+loadDB();
+initCalc();
+if(Object.keys(DB).length===0){loadDemo501();loadDemo813();}
+
+/* =========================
+   PULL TO REFRESH
+========================= */
+const scrollArea = document.getElementById('scroll-area');
+
+let touchStartY = 0;
+let touchEndY = 0;
+let isRefreshing = false;
+
+const refreshIndicator = document.createElement('div');
+refreshIndicator.innerHTML = '🔄 Refreshing...';
+refreshIndicator.style.cssText = `
+position:fixed;
+top:-60px;
+left:50%;
+transform:translateX(-50%);
+background:rgba(11,22,41,.95);
+color:#fff;
+padding:10px 18px;
+border-radius:20px;
+font-size:14px;
+font-weight:600;
+z-index:99999;
+transition:all .3s ease;
+border:1px solid rgba(99,179,237,.3);
+backdrop-filter:blur(10px);
+`;
+document.body.appendChild(refreshIndicator);
+
+scrollArea.addEventListener('touchstart', e => {
+  if(scrollArea.scrollTop === 0){
+    touchStartY = e.touches[0].clientY;
+  }
+}, {passive:true});
+
+scrollArea.addEventListener('touchmove', e => {
+  touchEndY = e.touches[0].clientY;
+
+  const pullDistance = touchEndY - touchStartY;
+
+  if(scrollArea.scrollTop === 0 && pullDistance > 70 && !isRefreshing){
+    refreshIndicator.style.top = '15px';
+  }
+}, {passive:true});
+
+scrollArea.addEventListener('touchend', () => {
+  const pullDistance = touchEndY - touchStartY;
+
+  if(scrollArea.scrollTop === 0 && pullDistance > 90 && !isRefreshing){
+
+    isRefreshing = true;
+
+    refreshIndicator.style.top = '15px';
+
+    setTimeout(() => {
+      location.reload();
+    }, 700);
+
+  } else {
+    refreshIndicator.style.top = '-60px';
+  }
+
+  touchStartY = 0;
+  touchEndY = 0;
+});
+
+window.addEventListener('load',()=>{
+  refreshIndicator.style.top='-60px';
+});
+
+</script>
+</body>
+</html>
