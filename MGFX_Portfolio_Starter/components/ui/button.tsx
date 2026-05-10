@@ -1,0 +1,1 @@
+export const Button = ({ children, asChild, variant }: any) => <button>{children}</button>;
